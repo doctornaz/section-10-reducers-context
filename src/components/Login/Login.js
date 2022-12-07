@@ -11,6 +11,11 @@ const Login = (props) => {
   const [passwordIsValid, setPasswordIsValid] = useState();
   const [formIsValid, setFormIsValid] = useState(false);
 
+  useEffect(()=> {
+
+  }); //if no dependencies, this will only run once. if we add dependencies, 
+  //this will execute every time the dependencies change and on re-renders.
+
   useEffect(() => {
     //this will execute 500 milliseconds after we stop typing.
     const identifier = setTimeout(()=> {
