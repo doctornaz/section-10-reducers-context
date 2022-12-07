@@ -1,39 +1,36 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useReducer } from 'react';
 
 import Card from '../UI/Card/Card';
 import classes from './Login.module.css';
 import Button from '../UI/Button/Button';
 
+//this goes outside because we are not using any data from the component function.
+const emailReducer = (state, actionDispatched) => {
+  if (actionDispatched.type === 'USER_INPUT')
+    return { value: actionDispatched.val, isValid: actionDispatched.val.includes('@') };
+  if (actionDispatched.type === 'INPUT_BLUR')
+    return { value: state.value, isValid: state.value.includes('@') };
+
+  return { value: '', isValid: false };
+};
+
 const Login = (props) => {
-  const [enteredEmail, setEnteredEmail] = useState('');
-  const [emailIsValid, setEmailIsValid] = useState();
   const [enteredPassword, setEnteredPassword] = useState('');
   const [passwordIsValid, setPasswordIsValid] = useState();
   const [formIsValid, setFormIsValid] = useState(false);
-
-  useEffect(()=> {
-
-  }); //if no dependencies, this will only run once. if we add dependencies, 
-  //this will execute every time the dependencies change and on re-renders.
-
-  useEffect(() => {
-    //this will execute 500 milliseconds after we stop typing.
-    const identifier = setTimeout(()=> {
-      setFormIsValid(
-        enteredEmail.includes('@') && enteredPassword.trim().length > 6
-      );
-    }, 500);
-    
-    return () => {
-      //this will clean up the timer at line 16 and the code won't execute to 
-      //prevent the timer from executing its internal function multiple times
-      console.log('cleanup');
-      clearTimeout(identifier);
-    }; //this cleanup function will execute every time (except the first) useEffect executes.
-  }, [enteredEmail, enteredPassword]);
+  
+  // const [state, dispatchFn] = useReducer(reducerFunction, initialState, initialStateFunction);
+  const [email, dispatchEmail] = useReducer(emailReducer, {
+    value: '',
+    isValid: null
+  }, );
 
   const emailChangeHandler = (event) => {
-    setEnteredEmail(event.target.value);
+    console.log(event.target.value);
+    dispatchEmail({
+      type: 'USER_INPUT', 
+      val: event.target.value
+    });
 
     setFormIsValid(
       event.target.value.includes('@') && enteredPassword.trim().length > 6
@@ -42,10 +39,14 @@ const Login = (props) => {
 
   const passwordChangeHandler = (event) => {
     setEnteredPassword(event.target.value);
+
+    setFormIsValid(
+      email.value.includes('@') && event.target.value.trim().length > 6
+    );
   };
 
   const validateEmailHandler = () => {
-    setEmailIsValid(enteredEmail.includes('@'));
+    dispatchEmail({type: 'INPUT_BLUR'});
   };
 
   const validatePasswordHandler = () => {
@@ -54,7 +55,7 @@ const Login = (props) => {
 
   const submitHandler = (event) => {
     event.preventDefault();
-    props.onLogin(enteredEmail, enteredPassword);
+    props.onLogin(email.value, enteredPassword);
   };
 
   return (
@@ -62,14 +63,14 @@ const Login = (props) => {
       <form onSubmit={submitHandler}>
         <div
           className={`${classes.control} ${
-            emailIsValid === false ? classes.invalid : ''
+            !email.isValid ? classes.invalid : ''
           }`}
         >
           <label htmlFor="email">E-Mail</label>
           <input
             type="email"
             id="email"
-            value={enteredEmail}
+            value={email.value}
             onChange={emailChangeHandler}
             onBlur={validateEmailHandler}
           />
