@@ -12,9 +12,19 @@ const Login = (props) => {
   const [formIsValid, setFormIsValid] = useState(false);
 
   useEffect(() => {
-    setFormIsValid(
-      enteredEmail.includes('@') && enteredPassword.trim().length > 6
-    );
+    //this will execute 500 milliseconds after we stop typing.
+    const identifier = setTimeout(()=> {
+      setFormIsValid(
+        enteredEmail.includes('@') && enteredPassword.trim().length > 6
+      );
+    }, 500);
+    
+    return () => {
+      //this will clean up the timer at line 16 and the code won't execute to 
+      //prevent the timer from executing its internal function multiple times
+      console.log('cleanup');
+      clearTimeout(identifier);
+    }; //this cleanup function will execute every time (except the first) useEffect executes.
   }, [enteredEmail, enteredPassword]);
 
   const emailChangeHandler = (event) => {
