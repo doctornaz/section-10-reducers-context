@@ -33,13 +33,33 @@ const Login = (props) => {
   const [email, dispatchEmail] = useReducer(emailReducer, { value: '', isValid: undefined });
   const [password, dispatchPassword] = useReducer(passwordReducer, { value: '', isValid: undefined });
 
+  //we're using object destructuring to prevent further validations after the fact our email and password are valid.
+  const { isValid: emailIsValid } = email;
+  const { isValid: passwordIsValid } = password;
+  //we do it this way to only grab the email.isvalid and password.isvalid changes. therefore the useEffect will only run
+  //when one of these 'isValid's changes. if we're using just 'email' or 'password' every single time email.value and password.value
+  //change regardless of wether they're valid or not.
+
+  useEffect(()=> {
+    //everytime wwe change email or password this timeout will execute, but if we retype 
+    //the "return" section will execute first, cancelling the validation and running it again.
+    const identifier = setTimeout(()=> {
+      setFormIsValid(emailIsValid && passwordIsValid);
+    }, 500);
+
+    return () => {
+      console.log('Cancelling validation');
+      clearTimeout(identifier);
+    }
+  }, [emailIsValid, passwordIsValid]);
+
   const emailChangeHandler = (event) => {
     dispatchEmail({
       type: 'USER_INPUT', 
       val: event.target.value
     });
 
-    setFormIsValid(event.target.value.includes('@') && password.value.trim().length > 6);
+    // setFormIsValid(event.target.value.includes('@') && password.value.trim().length > 6);
   };
 
   const passwordChangeHandler = (event) => {
@@ -49,7 +69,7 @@ const Login = (props) => {
     });
 
     setFormIsValid(
-      email.value.includes('@') && event.target.value.trim().length > 6
+      // email.value.includes('@') && event.target.value.trim().length > 6
     );
   };
 
