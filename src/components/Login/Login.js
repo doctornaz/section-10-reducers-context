@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useReducer } from 'react';
+import React, { useState, useEffect, useReducer, useContext } from 'react';
 
 import Card from '../UI/Card/Card';
 import classes from './Login.module.css';
 import Button from '../UI/Button/Button';
+import AuthContext from '../../context/auth-context';
 
 //this goes outside because we are not using any data from the component function.
 const emailReducer = (state, actionDispatched) => {
@@ -32,13 +33,13 @@ const Login = (props) => {
   // const [state, dispatchFn] = useReducer(reducerFunction, initialState, optional: initialStateFunction);
   const [email, dispatchEmail] = useReducer(emailReducer, { value: '', isValid: undefined });
   const [password, dispatchPassword] = useReducer(passwordReducer, { value: '', isValid: undefined });
-
   //we're using object destructuring to prevent further validations after the fact our email and password are valid.
   const { isValid: emailIsValid } = email;
   const { isValid: passwordIsValid } = password;
   //we do it this way to only grab the email.isvalid and password.isvalid changes. therefore the useEffect will only run
   //when one of these 'isValid's changes. if we're using just 'email' or 'password' every single time email.value and password.value
   //change regardless of wether they're valid or not.
+  const ctx = useContext(AuthContext);
 
   useEffect(()=> {
     //everytime wwe change email or password this timeout will execute, but if we retype 
@@ -68,9 +69,9 @@ const Login = (props) => {
       val: event.target.value
     });
 
-    setFormIsValid(
+    // setFormIsValid(
       // email.value.includes('@') && event.target.value.trim().length > 6
-    );
+    // );
   };
 
   const validateEmailHandler = () => dispatchEmail({type: 'INPUT_BLUR'});
@@ -79,7 +80,7 @@ const Login = (props) => {
 
   const submitHandler = (event) => {
     event.preventDefault();
-    props.onLogin(email.value, password.value);
+    ctx.onLogin(email.value, password.value);
   };
 
   return (
@@ -110,7 +111,7 @@ const Login = (props) => {
           <input
             type="password"
             id="password"
-            value={password}
+            value={password.value}
             onChange={passwordChangeHandler}
             onBlur={validatePasswordHandler}
           />
