@@ -1,0 +1,25 @@
+import React from "react"
+import classes from './Input.module.css';
+
+const Input = (props) => {
+  return (
+    //!isValid is not falsey as it starts as null/undefined
+    <div className={`${classes.control} ${ 
+        props.isValid === false ? classes.invalid : ''
+        }`}
+        >
+        <label htmlFor={props.id}>
+            {props.labelText}
+        </label>
+        <input
+            type={props.type}
+            id={props.id}
+            value={props.value}
+            onChange={props.onChange}
+            onBlur={props.onBlur}
+        />
+    </div>
+  )
+};
+
+export default Input;
