@@ -1,5 +1,10 @@
-import React, { useState, useEffect, useReducer, useContext } from 'react';
-
+import React, { 
+  useState, 
+  useEffect, 
+  useReducer, 
+  useContext, 
+  useRef 
+} from 'react';
 import Card from '../UI/Card/Card';
 import classes from './Login.module.css';
 import Button from '../UI/Button/Button';
@@ -41,6 +46,8 @@ const Login = (props) => {
   //when one of these 'isValid's changes. if we're using just 'email' or 'password' every single time email.value and password.value
   //change regardless of wether they're valid or not.
   const ctx = useContext(AuthContext);
+  const emailInputRef = useRef();
+  const passwordInputRef = useRef();
 
   useEffect(()=> {
     //everytime wwe change email or password this timeout will execute, but if we retype 
@@ -77,13 +84,20 @@ const Login = (props) => {
 
   const submitHandler = (event) => {
     event.preventDefault();
-    ctx.onLogin(email.value, password.value);
+    if (formIsValid){
+      ctx.onLogin(email.value, password.value);
+    } else if(!emailIsValid){
+      emailInputRef.current.focus();
+    } else { //password is invalid. emailisvalid goes first cuz its the first possibly invalid input
+      passwordInputRef.current.focus();
+    }
   };
 
   return (
     <Card className={classes.login}>
       <form onSubmit={submitHandler}>
         <Input 
+          ref={emailInputRef}
           labelText='E-Mail'
           type='email'
           isValid={emailIsValid}
@@ -92,6 +106,7 @@ const Login = (props) => {
           onBlur={validateEmailHandler} />
 
         <Input 
+          ref={passwordInputRef}
           labelText='Password'
           type='password' 
           isValid={passwordIsValid}
@@ -100,7 +115,7 @@ const Login = (props) => {
           onBlur={validatePasswordHandler} />
 
         <div className={classes.actions}>
-          <Button type="submit" className={classes.btn} disabled={!formIsValid}>
+          <Button type="submit" className={classes.btn} >
             Login
           </Button>
         </div>
